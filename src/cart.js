@@ -17,14 +17,30 @@ function addToCart(cart, product, quantity) {
   return cart;
 }
 
-function changeQuantity() {
-  return notImplemented();
+function changeQuantity(cart, id, quantity) {
+  const product = cart.find((item) => item.id === id);
+  if (!product) return cart;
+  if (quantity === 0 || quantity > product.stock) {
+    throw new RangeError();
+  }
+  product.quantity = quantity;
+  return cart;
 }
-function removeFromCart() {
-  return notImplemented();
+
+function removeFromCart(cart, id) {
+  cart = cart.filter((item) => item.id !== id);
+  return cart;
 }
-function calculateCartSubtotal() {
-  return notImplemented();
+
+function calculateCartSubtotal(cart) {
+  if (cart.length === 0) return 0;
+
+  const sumSubtotal = cart.reduce((total, item) => {
+    const subtotal = item.price * item.quantity;
+    return total + subtotal;
+  }, 0);
+
+  return sumSubtotal;
 }
 function calculateOrderTotal() {
   return notImplemented();
