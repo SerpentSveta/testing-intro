@@ -2,13 +2,71 @@ function notImplemented() {
   throw new Error('Корзина ещё не реализована. Сначала прочитайте тесты.');
 }
 
-function addToCart() { return notImplemented(); }
-function changeQuantity() { return notImplemented(); }
-function removeFromCart() { return notImplemented(); }
-function calculateCartSubtotal() { return notImplemented(); }
-function calculateOrderTotal() { return notImplemented(); }
+function addToCart(cart, product, quantity) {
+  const productInCart = cart.find((item) => item.id === product.id);
+  if (quantity === 0 || quantity >= product.stock) {
+    throw new RangeError();
+  }
+  if (productInCart) {
+    productInCart.quantity += quantity;
+  } else {
+    const item = { ...product, quantity };
+    cart.push(item);
+  }
 
-const cartApi = { addToCart, changeQuantity, removeFromCart, calculateCartSubtotal, calculateOrderTotal };
+  return cart;
+}
+
+function changeQuantity(cart, id, quantity) {
+  const product = cart.find((item) => item.id === id);
+  if (!product) return cart;
+  if (quantity === 0 || quantity > product.stock) {
+    throw new RangeError();
+  }
+  product.quantity = quantity;
+  return cart;
+}
+
+function removeFromCart(cart, id) {
+  cart = cart.filter((item) => item.id !== id);
+  return cart;
+}
+
+function calculateCartSubtotal(cart) {
+  if (cart.length === 0) return 0;
+
+  const sumSubtotal = cart.reduce((total, item) => {
+    const subtotal = item.price * item.quantity;
+    return total + subtotal;
+  }, 0);
+
+  return sumSubtotal;
+}
+
+function calculateOrderTotal(cart, promoCode) {
+  let subtotal = calculateCartSubtotal(cart);
+  let delivery = 30000;
+  let discount = 0;
+  let percent = 0;
+  let total = 0;
+  if (promoCode === 'SAVE10' && subtotal >= 20000) {
+    percent = 10;
+  }
+  if (subtotal >= 50000) {
+    delivery = 0;
+  }
+  discount = subtotal * (percent / 100);
+  total = subtotal - discount + delivery;
+  return { subtotal, discount, delivery, total };
+}
+
+const cartApi = {
+  addToCart,
+  changeQuantity,
+  removeFromCart,
+  calculateCartSubtotal,
+  calculateOrderTotal,
+};
 
 if (typeof module !== 'undefined') module.exports = cartApi;
 if (typeof window !== 'undefined') window.cartApi = cartApi;
